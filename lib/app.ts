@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import { config } from './config';
 import PostController from './controllers/post.controllers';
+import UserController from './controllers/user.controller';
 
 export class App {
   public app: Application;
@@ -19,7 +20,7 @@ export class App {
     this.app.use(cors({
       origin: 'http://localhost:4200',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization']
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
     }));
 
     this.app.use(express.json({ limit: '10mb' }));
@@ -31,8 +32,12 @@ export class App {
     });
   }
 
-  private initializeRoutes() {
-    this.app.use('/', new PostController().router);
+  private initializeRoutes() {   
+    const postController = new PostController();
+    const userController = new UserController();
+
+    this.app.use('/', postController.router);
+    this.app.use('/api', userController.router);
   }
 
   private async connectToDatabase(): Promise<void> {
@@ -51,17 +56,14 @@ export class App {
       console.log('MongoDB disconnected');
     });
 
-    process.on('SIGINT', async () => {
+    const gracefulExit = async () => {
       await mongoose.connection.close();
       console.log('MongoDB connection closed due to app termination');
       process.exit(0);
-    });
+    };
 
-    process.on('SIGTERM', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed due to app termination');
-      process.exit(0);
-    });
+    process.on('SIGINT', gracefulExit);
+    process.on('SIGTERM', gracefulExit);
   }
 
   public listen() {
