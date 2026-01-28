@@ -14,6 +14,14 @@ class UserService {
     public async getById(id: string) {
         return await UserModel.findById(id);
     }
+
+    public async getAll() {
+        return await UserModel.find({});
+    }
+
+    public async deleteAll() {
+        return await UserModel.deleteMany({});
+    }
 }
 
 export default UserService;

@@ -16,7 +16,27 @@ class UserController {
         this.router.post(`${this.path}/create`, this.register);
         this.router.post(`${this.path}/auth`, this.login);
         this.router.delete(`${this.path}/logout/:id`, this.logout);
+        this.router.get(`${this.path}/get`, this.getAllUsers); 
+        this.router.delete(`${this.path}/all`, this.deleteAllUsers);
     }
+
+    private getAllUsers = async (req: Request, res: Response) => {
+        try {
+            const users = await this.userService.getAll();
+            res.status(200).json(users);
+        } catch (error) {
+            res.status(500).json({ error: 'Błąd pobierania danych' });
+        }
+    };
+
+    private deleteAllUsers = async (req: Request, res: Response) => {
+        try {
+            await this.userService.deleteAll();
+            res.status(200).json({ message: 'Wszyscy użytkownicy zostali usunięci z bazy danych' });
+        } catch (error) {
+            res.status(500).json({ error: 'Błąd podczas usuwania bazy użytkowników' });
+        }
+    };
 
     private register = async (req: Request, res: Response) => {
         try {
