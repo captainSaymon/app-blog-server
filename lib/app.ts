@@ -19,7 +19,7 @@ export class App {
   private initializeMiddlewares() {
     this.app.use(cors({
       origin: 'http://localhost:4200',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
     }));
 
