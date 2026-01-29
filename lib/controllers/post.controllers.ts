@@ -11,6 +11,8 @@ class PostController {
 
   private initializeRoutes() {
     this.router.post(`/posts/:num`, checkPostCount, this.addData);
+    this.router.patch('/posts/like/:id', this.likePost);
+    this.router.patch('/posts/unlike/:id', this.unlikePost);
     this.router.get(`/gets/all`, this.getAll);
     this.router.get(`/gets/query`, this.getElement);
     this.router.get(`/gets/:id`, this.getElementById);
@@ -37,7 +39,7 @@ class PostController {
   }
 
   private getElement = async (req: Request, res: Response) => {
-  const filters = req.body;
+  const filters = req.query;
   try {
     const result = await PostModel.find(filters, { __v: 0 });
     res.status(200).json(result);
@@ -104,6 +106,48 @@ class PostController {
       res.status(500).json({ error: 'Błąd serwera' });
     }
   }
+
+  private likePost = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+      const updatedPost = await PostModel.findByIdAndUpdate(
+        id,
+        { $inc: { likes: 1 } },
+        { new: true }
+      );
+
+      if (!updatedPost) {
+        return res.status(404).json({ error: 'Nie znaleziono posta' });
+      }
+
+      res.status(200).json(updatedPost);
+    } catch (error: any) {
+      console.error('Like error:', error.message);
+      res.status(500).json({ error: 'Błąd serwera' });
+    }
+  };
+
+  private unlikePost = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+      const updatedPost = await PostModel.findByIdAndUpdate(
+        id,
+        { $inc: { likes: -1 } },
+        { new: true }
+      );
+
+      if (!updatedPost) {
+        return res.status(404).json({ error: 'Nie znaleziono posta' });
+      }
+
+      res.status(200).json(updatedPost);
+    } catch (error: any) {
+      console.error('Unlike error:', error.message);
+      res.status(500).json({ error: 'Błąd serwera' });
+    }
+  };
 }
 
 export default PostController;
